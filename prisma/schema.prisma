@@ -1,0 +1,102 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+
+model Employee {
+  id            Int            @id @default(autoincrement())
+  fullname      String
+  email         String         @unique
+  phone_number  String?
+  adress        String?
+  birth_date    DateTime?
+  hire_date     DateTime       @default(now())
+  status        String         @default("active")
+  salary        Float          @default(0)
+
+  department_id Int?
+  department    Department?    @relation(fields: [department_id], references: [id])
+
+  role_id       Int?
+  role          Role?          @relation(fields: [role_id], references: [id])
+
+  tasks         Task[]
+  payrolls      Payroll[]
+  presences     Presence[]
+  leaveRequests LeaveRequest[]
+}
+
+model Department {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  status      String      @default("active")
+
+  employees Employee[]
+}
+
+model Role {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  status      String      @default("active")
+
+  employees Employee[]
+}
+
+model Task {
+  id           Int        @id @default(autoincrement())
+  title        String
+  description  String?
+  due_date     DateTime?
+  status       String     @default("pending")
+
+  employee_id  Int
+  employee     Employee   @relation(fields: [employee_id], references: [id])
+}
+
+model Payroll {
+  id          Int        @id @default(autoincrement())
+  salary      Int
+  bonuses     Int
+  deductions  Int
+  net_salary  Int
+  amount      Int
+  pay_date    DateTime   @default(now())
+  status      String     @default("processed")
+
+  employee_id Int
+  employee    Employee   @relation(fields: [employee_id], references: [id])
+}
+
+model Presence {
+  id          Int        @id @default(autoincrement())
+  date        DateTime   @default(now())
+  check_in    DateTime?
+  check_out   DateTime?
+  status      String     @default("present")
+
+  employee_id Int
+  employee    Employee   @relation(fields: [employee_id], references: [id])
+}
+
+model LeaveRequest {
+  id          Int        @id @default(autoincrement())
+  leave_type  String
+  start_date  DateTime
+  end_date    DateTime
+  reason      String?
+  status      String     @default("pending")
+
+  employee_id Int
+  employee    Employee   @relation(fields: [employee_id], references: [id])
+}
